@@ -47,12 +47,17 @@ void AssetFactory::loadMeshes()
     AssetFactory& instance = getInstance();
     instance._meshes.screen.reset(new lithium::Mesh(AssetFactory::objectAttributes, screenMeshVertices, screenMeshIndices));
     instance._meshes.cube = lithium::tinyobjloader_load("assets/block.obj", objectAttributes);
+    instance._meshes.shack = lithium::tinyobjloader_load("assets/shack.obj", objectAttributes);
+    instance._meshes.floor = lithium::tinyobjloader_load("assets/floor.obj", objectAttributes, glm::vec2{ 10.0f, 10.0f });
+    instance._meshes.inside = lithium::tinyobjloader_load("assets/inside.obj", objectAttributes);
 }
 
 void AssetFactory::loadTextures()
 {
     AssetFactory& instance = getInstance();
     instance._textures.logoDiffuse.reset((lithium::ImageTexture*)lithium::ImageTexture::load("assets/Kraxbox_logo_lithium_metal_2ff2069c-b84a-426c-bf92-e9831105a5df.png", GL_SRGB_ALPHA, GL_RGBA)->setFilter(GL_NEAREST));
+    instance._textures.woodDiffuse.reset((lithium::ImageTexture*)lithium::ImageTexture::load("assets/wood.png", GL_SRGB_ALPHA, GL_RGBA)->setFilter(GL_NEAREST)->setWrap(GL_REPEAT));
+    instance._textures.insideDiffuse.reset((lithium::ImageTexture*)lithium::ImageTexture::load("assets/inside.png", GL_SRGB_ALPHA, GL_RGBA)->setFilter(GL_LINEAR)->setWrap(GL_REPEAT));
 }
 
 void AssetFactory::loadObjects()

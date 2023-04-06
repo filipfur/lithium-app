@@ -16,6 +16,15 @@ in vec2 texCoord;
 in vec3 normal;
 in vec3 fragPos;
 
+float near_plane = 0.1;
+float far_plane = 100.0;
+
+float LinearizeDepth(float depth)
+{
+    float z = depth * 2.0 - 1.0; // Back to NDC 
+    return (2.0 * near_plane * far_plane) / (far_plane + near_plane - z * (far_plane - near_plane));	
+}
+
 void calcLight(inout float diffuse, inout float specular, inout float fresnel, in vec3 lightPos, in float strength)
 {
     vec3 lightDelta = lightPos - fragPos;
@@ -63,7 +72,13 @@ void main()
         calcLight(diffuse, specular, fresnel, u_point_lights[i].xyz, u_point_lights[i].w);
     }
 
+    calcLight(diffuse, specular, fresnel, vec3(0.0, -2.0, 0.5), 2.0);
+    //calcLight(diffuse, specular, fresnel, vec3(-1.0, 0.0, 1.0), 0.2);
+    //calcLight(diffuse, specular, fresnel, vec3(1.0, 0.0, 1.0), 0.2);
+
     fragColor = vec4(ambient + (diffuse + specular + fresnel) * color.rgb * vec3(1.0, 0.6, 0.4), color.a);
     fragColor.rgb = vec3(1.0) - exp(-fragColor.rgb * exposure);
-    fragColor.rgb = pow(fragColor.rgb, vec3(1.0/2.2));
+    float linearDepth = 1.0 - LinearizeDepth(gl_FragCoord.z) / far_plane;
+    fragColor.rgb = pow(fragColor.rgb /** linearDepth*/, vec3(1.0/2.2));
+    //fragColor.rgb = vec3(linearDepth);
 }

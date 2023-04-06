@@ -14,11 +14,16 @@ public:
     {
         std::shared_ptr<lithium::Mesh> cube;
         std::shared_ptr<lithium::Mesh> screen;
+        std::shared_ptr<lithium::Mesh> shack;
+        std::shared_ptr<lithium::Mesh> floor;
+        std::shared_ptr<lithium::Mesh> inside;
     } _meshes;
 
     struct Textures
     {
         std::shared_ptr<lithium::ImageTexture> logoDiffuse;
+        std::shared_ptr<lithium::ImageTexture> woodDiffuse;
+        std::shared_ptr<lithium::ImageTexture> insideDiffuse;
     } _textures;
 
     struct Objects
