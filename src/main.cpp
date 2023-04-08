@@ -5,7 +5,7 @@
 class App : public lithium::Application
 {
 public:
-    App() : Application{"lithium-lab", glm::ivec2{1440, 800}, lithium::Application::Mode::DEFAULT, false}
+    App() : Application{"lithium-lab", glm::ivec2{1440, 800}, lithium::Application::Mode::MULTISAMPLED_4X, false}
     {
         AssetFactory::loadMeshes();
         AssetFactory::loadTextures();
@@ -16,24 +16,42 @@ public:
         _object->setPosition(glm::vec3{0.0f, 1.0f, 0.0f});
         _object->setScale(glm::vec3{1.0f, 2.0f, 0.5f});
         _renderPipeline = new Pipeline(defaultFrameBufferResolution());
-        //_renderPipeline->addSecondary(_object.get());
-        _shack = std::shared_ptr<lithium::Object>(new lithium::Object(AssetFactory::getMeshes()->shack,
-                                                                      {AssetFactory::getTextures()->woodDiffuse}));
-        _renderPipeline->addFacade(_shack.get());
 
         _floor = std::shared_ptr<lithium::Object>(new lithium::Object(AssetFactory::getMeshes()->floor,
                                                                      {AssetFactory::getTextures()->woodDiffuse}));
-        _floor->setPosition(glm::vec3{0.0f, -1.0f, 0.0f});
         _floor->setScale(3.0f);
         _renderPipeline->addRenderable(_floor.get());
 
         _inside = std::shared_ptr<lithium::Object>(new lithium::Object(AssetFactory::getMeshes()->inside,
                                                                       {AssetFactory::getTextures()->insideDiffuse}));
+        _inside->setPosition(glm::vec3{0.0f, 1.0f, 0.0f});
+                                                                    
         _renderPipeline->addSecondary(_inside.get());
 
-        _objects.push_back(_object);
-        _objects.push_back(_shack);
-        _objects.push_back(_floor);
+        _house = std::shared_ptr<lithium::Object>(new lithium::Object(AssetFactory::getMeshes()->house,
+                                                                     {AssetFactory::getTextures()->houseDiffuse}));
+
+        _house->setRotation(glm::vec3{0.0f, -90.0f, 0.0f});
+
+        _house->setPosition(glm::vec3{0.0f, 0.0f, 1.0f});
+
+        _renderPipeline->addRenderable(_house.get());
+
+        _stencil = std::shared_ptr<lithium::Object>(new lithium::Object(AssetFactory::getMeshes()->stencil,
+                                                                       {}));
+
+        _stencil->setPosition(glm::vec3{0.0f, 0.0f, 1.0f});
+        _stencil->setRotation(glm::vec3{0.0f, -90.0f, 0.0f});
+
+        _renderPipeline->addFacade(_stencil.get());
+
+        _door = std::shared_ptr<lithium::Object>(new lithium::Object(AssetFactory::getMeshes()->door,
+                                                                    {AssetFactory::getTextures()->houseDiffuse}));
+
+        _door->setPosition(glm::vec3{0.0f, 0.0f, 1.0f});
+        _door->setRotation(glm::vec3{0.0f, -90.0f, 0.0f});
+
+        _renderPipeline->addRenderable(_door.get());
 
         input()->addPressedCallback(GLFW_KEY_ESCAPE, [this](int key, int mods) {
             exit(0);
@@ -69,7 +87,7 @@ public:
         float t = sinf(time()) * 0.5f;
         float rotX = sinf(t);
         float rotZ = cosf(t);
-        _renderPipeline->camera()->setPosition(glm::vec3{5.0f * rotX, 1.0f, 5.0f * rotZ});
+        _renderPipeline->camera()->setPosition(glm::vec3{6.0f * rotX, 2.0f, 6.0f * rotZ});
 
 
         _renderPipeline->camera()->update(dt);
@@ -88,6 +106,9 @@ private:
     std::shared_ptr<lithium::Object> _shack;
     std::shared_ptr<lithium::Object> _floor;
     std::shared_ptr<lithium::Object> _inside;
+    std::shared_ptr<lithium::Object> _house;
+    std::shared_ptr<lithium::Object> _stencil;
+    std::shared_ptr<lithium::Object> _door;
 };
 
 int main(int argc, const char *argv[])

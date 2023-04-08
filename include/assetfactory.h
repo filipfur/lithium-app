@@ -17,6 +17,9 @@ public:
         std::shared_ptr<lithium::Mesh> shack;
         std::shared_ptr<lithium::Mesh> floor;
         std::shared_ptr<lithium::Mesh> inside;
+        std::shared_ptr<lithium::Mesh> house;
+        std::shared_ptr<lithium::Mesh> stencil;
+        std::shared_ptr<lithium::Mesh> door;
     } _meshes;
 
     struct Textures
@@ -24,6 +27,7 @@ public:
         std::shared_ptr<lithium::ImageTexture> logoDiffuse;
         std::shared_ptr<lithium::ImageTexture> woodDiffuse;
         std::shared_ptr<lithium::ImageTexture> insideDiffuse;
+        std::shared_ptr<lithium::ImageTexture> houseDiffuse;
     } _textures;
 
     struct Objects
