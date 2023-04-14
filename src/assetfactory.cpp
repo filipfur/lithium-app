@@ -47,12 +47,16 @@ void AssetFactory::loadMeshes()
     AssetFactory& instance = getInstance();
     instance._meshes.screen.reset(new lithium::Mesh(AssetFactory::objectAttributes, screenMeshVertices, screenMeshIndices));
     instance._meshes.cube = lithium::tinyobjloader_load("assets/block.obj", objectAttributes);
+    instance._meshes.plane = lithium::tinyobjloader_load("assets/plane.obj", objectAttributes);
+    instance._meshes.chess = lithium::tinyobjloader_load("assets/chess.obj", objectAttributes);
 }
 
 void AssetFactory::loadTextures()
 {
     AssetFactory& instance = getInstance();
-    instance._textures.logoDiffuse.reset((lithium::ImageTexture*)lithium::ImageTexture::load("assets/Kraxbox_logo_lithium_metal_2ff2069c-b84a-426c-bf92-e9831105a5df.png", GL_SRGB_ALPHA, GL_RGBA)->setFilter(GL_NEAREST));
+    instance._textures.logoDiffuse.reset((lithium::ImageTexture*)lithium::ImageTexture::load("assets/Kraxbox_logo_lithium_metal_2ff2069c-b84a-426c-bf92-e9831105a5df.png", GL_SRGB_ALPHA, GL_RGBA)->setFilter(GL_LINEAR));
+    instance._textures.marbleDiffuse.reset((lithium::ImageTexture*)lithium::ImageTexture::load("assets/color_map.jpg", GL_SRGB_ALPHA, GL_RGBA)->setFilter(GL_LINEAR));
+    instance._textures.marbleLoresDiffuse.reset((lithium::ImageTexture*)lithium::ImageTexture::load("assets/AO.png", GL_SRGB_ALPHA, GL_RGBA)->setFilter(GL_LINEAR));
 }
 
 void AssetFactory::loadObjects()

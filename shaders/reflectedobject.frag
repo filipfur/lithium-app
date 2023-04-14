@@ -9,6 +9,7 @@ uniform sampler2D u_texture_0;
 uniform vec4 u_color;
 uniform float u_time;
 uniform vec3 u_view_pos;
+uniform vec3 u_mirror_pos;
 
 out vec4 fragColor;
 
@@ -63,7 +64,10 @@ void main()
         calcLight(diffuse, specular, fresnel, u_point_lights[i].xyz, u_point_lights[i].w);
     }*/
 
-    fragColor = vec4(ambient + (diffuse + specular + fresnel) * color.rgb * vec3(1.0, 0.6, 0.4), color.a);
+    float distanceFromMirror = length(fragPos - u_mirror_pos);
+
+    fragColor = vec4(ambient + (diffuse + specular + fresnel) * color.rgb * vec3(1.0, 0.6, 0.4),
+        color.a * max(0.0, 0.7 - distanceFromMirror * 0.3));
     fragColor.rgb = vec3(1.0) - exp(-fragColor.rgb * exposure);
     fragColor.rgb = pow(fragColor.rgb, vec3(1.0/2.2));
 }
