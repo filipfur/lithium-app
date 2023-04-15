@@ -25,6 +25,8 @@ public:
         _renderPipeline->addRenderable(_object.get());
         _renderPipeline->addRenderable(_plane.get());
         _objects.push_back(_object);
+
+        printf("%s\n", glGetString(GL_VERSION));
     }
 
     virtual ~App() noexcept
