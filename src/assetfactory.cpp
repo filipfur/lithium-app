@@ -53,6 +53,16 @@ void AssetFactory::loadTextures()
 {
     AssetFactory& instance = getInstance();
     instance._textures.logoDiffuse.reset((lithium::ImageTexture*)lithium::ImageTexture::load("assets/Kraxbox_logo_lithium_metal_2ff2069c-b84a-426c-bf92-e9831105a5df.png", GL_SRGB_ALPHA, GL_RGBA)->setFilter(GL_NEAREST));
+    instance._textures.noiseTexture.reset(new lithium::Texture<unsigned char>(nullptr, 2048, 2048, GL_FLOAT, GL_RGBA32F, GL_RGBA, GL_TEXTURE_2D));
+    instance._textures.noiseTexture->bind();
+    instance._textures.noiseTexture->bindImageTexture(0, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
+    instance._textures.noiseTexture->setFilter(GL_LINEAR);
+    instance._textures.noiseTexture->unbind();
+    instance._textures.computeTextureOut.reset(new lithium::Texture<unsigned char>(nullptr, 2048, 2048, GL_FLOAT, GL_RGBA32F, GL_RGBA, GL_TEXTURE_2D));
+    instance._textures.computeTextureOut->bind();
+    instance._textures.computeTextureOut->bindImageTexture(1, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
+    instance._textures.computeTextureOut->setFilter(GL_LINEAR);
+    instance._textures.computeTextureOut->unbind();
 }
 
 void AssetFactory::loadObjects()

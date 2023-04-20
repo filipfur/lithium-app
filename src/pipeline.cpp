@@ -29,13 +29,13 @@ Pipeline::Pipeline(const glm::ivec2& resolution) : lithium::RenderPipeline{resol
         return dynamic_cast<lithium::Object*>(renderable);
     });
     _mainStage = addRenderStage(std::make_shared<lithium::RenderStage>(_frameBuffer, glm::ivec4{0, 0, resolution.x, resolution.y}, [this](){
-        clearColor(0.8f, 1.0f, 0.8f, 1.0f);
+        clearColor(0.0f, 0.0f, 0.0f, 0.0f);
         clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         _blockShader->setUniform("u_view", _camera->view());
         _blockShader->setUniform("u_time", 0.0f);
         _screenShader->use();
         AssetFactory().getMeshes()->screen->bind();
-        glActiveTexture(GL_TEXTURE0);
+        AssetFactory::getTextures()->computeTextureOut->bind(GL_TEXTURE0);
         disableDepthWriting();
         AssetFactory().getMeshes()->screen->draw();
         enableDepthWriting();
