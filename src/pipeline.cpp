@@ -51,55 +51,53 @@ Pipeline::Pipeline(const glm::ivec2& resolution) : lithium::RenderPipeline{resol
 
         clearColor(0.0f, 0.0f, 0.0f, 0.0f);
         clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-        //_screenShader->use();
-        //AssetFactory().getMeshes()->screen->bind();
-        //glActiveTexture(GL_TEXTURE0);
-        //disableDepthWriting();
-        //AssetFactory().getMeshes()->screen->draw();
-        //enableDepthWriting();
+
         disableStencilWriting();
         _mainGroup->render(_blockShader.get());
         
         enableStencilWriting();
-        stencilFunc(GL_ALWAYS, 0x02);
-        _mirrorGroup->render(_blockShader.get());
-        
-        disableStencilWriting();
-        stencilFunc(GL_EQUAL, 0x02);
-        /*_screenShader->use();
-        AssetFactory().getMeshes()->screen->bind();
-        glActiveTexture(GL_TEXTURE0);
-        disableDepthWriting();
-        AssetFactory().getMeshes()->screen->draw();
-        enableDepthWriting();*/
+        GLuint stencilIndex = 2;
+        _mirrorGroup->forEach([this, &stencilIndex](lithium::Renderable* renderable){
+            stencilFunc(GL_ALWAYS, stencilIndex++);
+            renderable->render(_blockShader.get());
+        });
 
         glClear(GL_DEPTH_BUFFER_BIT);
         
-        _mirrorGroup->forEach([this](lithium::Renderable* renderable){
+        disableStencilWriting();
+        stencilIndex = 2;
+        _mirrorGroup->forEach([this, &stencilIndex](lithium::Renderable* renderable){
+            stencilFunc(GL_EQUAL, stencilIndex++);
             auto reflector = dynamic_cast<Mirror*>(renderable);
 
-            glm::vec3 mirrorPosition = reflector->position();
-            glm::vec3 mirrorNormal = reflector->reflectionNormal();
-            glm::vec3 cameraPosition = _camera->position();
-            glm::vec3 cameraToMirror = mirrorPosition - cameraPosition;
-            glm::vec3 reflectedCameraToMirror = glm::reflect(cameraToMirror, mirrorNormal);
-            glm::vec3 reflectedCamera = mirrorPosition - reflectedCameraToMirror;
+            const glm::vec3 mirrorPosition = reflector->position();
+            const glm::vec3 mirrorNormal = reflector->reflectionNormal();
+            const glm::vec3 cameraPosition = _camera->position();
+
+            const glm::vec3 cameraToMirror = mirrorPosition - cameraPosition;
+            const glm::vec3 reflectedCameraToMirror = glm::reflect(cameraToMirror, mirrorNormal);
+            const glm::vec3 reflectedCamera = mirrorPosition - reflectedCameraToMirror;
+            if(glm::length2(reflectedCamera) != glm::length2(cameraToMirror))
+            {
+                
+            }
             const glm::vec3 eyeToX = _camera->target() - _camera->position();
-            glm::vec3 reflectedView = glm::reflect(eyeToX, mirrorNormal);
+            const glm::vec3 reflectedView = glm::reflect(eyeToX, mirrorNormal);
 
             //view matrix of the reflected camera
             glm::mat4 view = glm::lookAt(reflectedCamera, reflectedCamera + reflectedView,
                 glm::reflect(glm::vec3{0.0f, 1.0f, 0.0f}, mirrorNormal));
-
             glm::mat4 mirrorMatrix{1.0f};
             mirrorMatrix[0][0] = -1.0f;
-
             view = mirrorMatrix * view;
 
             cullFrontFace();
+            //disableDepthWriting();
             _mirrorShader->setUniform("u_view", view);
             _mirrorShader->setUniform("u_mirror_pos", mirrorPosition);
+            _mirrorShader->setUniform("u_reflection_normal", mirrorNormal);
             _mainGroup->render(_mirrorShader.get());
+            //enableDepthWriting();
             cullBackFace();
         });
         stencilFunc(GL_ALWAYS, 0x01);
@@ -111,7 +109,6 @@ Pipeline::Pipeline(const glm::ivec2& resolution) : lithium::RenderPipeline{resol
         _msaaShader->use();
         _mainStage->frameBuffer()->texture(GL_COLOR_ATTACHMENT0)->bind(GL_TEXTURE0);
         _mainStage->frameBuffer()->bindTexture(GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE1);
-        //_borderDepthFBO->bindTexture(GL_COLOR_ATTACHMENT0, GL_TEXTURE2);
         AssetFactory::getMeshes()->screen->bind();
         AssetFactory::getMeshes()->screen->draw();
     }));
@@ -122,4 +119,7 @@ Pipeline::Pipeline(const glm::ivec2& resolution) : lithium::RenderPipeline{resol
 Pipeline::~Pipeline()
 {
     _blockShader = nullptr;
+    _mirrorShader = nullptr;
+    _msaaShader = nullptr;
+    _screenShader = nullptr;
 }

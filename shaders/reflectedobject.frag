@@ -1,4 +1,4 @@
-#version 460 core
+#version 330 core
 
 layout (std140) uniform SceneBlock
 {
@@ -10,6 +10,7 @@ uniform vec4 u_color;
 uniform float u_time;
 uniform vec3 u_view_pos;
 uniform vec3 u_mirror_pos;
+uniform vec3 u_reflection_normal;
 
 out vec4 fragColor;
 
@@ -64,10 +65,12 @@ void main()
         calcLight(diffuse, specular, fresnel, u_point_lights[i].xyz, u_point_lights[i].w);
     }*/
 
-    float distanceFromMirror = length(fragPos - u_mirror_pos);
+    vec3 v = fragPos - u_mirror_pos;
+
+    float distanceFromMirror = abs(dot(v, u_reflection_normal));
 
     fragColor = vec4(ambient + (diffuse + specular + fresnel) * color.rgb * vec3(1.0, 0.6, 0.4),
-        color.a * max(0.0, 0.7 - distanceFromMirror * 0.3));
+        color.a * max(0.0, 0.7 - distanceFromMirror * 0.8));
     fragColor.rgb = vec3(1.0) - exp(-fragColor.rgb * exposure);
     fragColor.rgb = pow(fragColor.rgb, vec3(1.0/2.2));
 }

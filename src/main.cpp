@@ -3,6 +3,8 @@
 #include "assetfactory.h"
 #include "mirror.h"
 
+using TextureArray = std::vector<lithium::Object::TexturePointer>;
+
 class App : public lithium::Application
 {
 public:
@@ -12,19 +14,40 @@ public:
         AssetFactory::loadTextures();
         AssetFactory::loadObjects();
         AssetFactory::loadFonts();
-        //_object = std::shared_ptr<lithium::Object>(new lithium::Object(AssetFactory::getMeshes()->cube, {AssetFactory::getTextures()->logoDiffuse}));
-        _object = std::shared_ptr<lithium::Object>(new lithium::Object(AssetFactory::getMeshes()->chess, {AssetFactory::getTextures()->marbleLoresDiffuse}));
-        _object->setPosition(glm::vec3{0.0f, 0.0f, 0.0f});
-        //_object->setScale(glm::vec3{0.5f});
 
-        _plane = std::shared_ptr<Mirror>(new Mirror(AssetFactory::getMeshes()->plane,
-            {AssetFactory::getTextures()->marbleDiffuse}));
-        _plane->setScale(1.5f);
+        auto object = std::make_shared<lithium::Object>(AssetFactory::getMeshes()->chess,
+            TextureArray{AssetFactory::getTextures()->marbleLoresDiffuse});
+        object->setPosition(glm::vec3{0.0f, 0.0f, 0.0f});
+
+        auto cube = std::make_shared<lithium::Object>(AssetFactory::getMeshes()->cube,
+            TextureArray{AssetFactory::getTextures()->logoDiffuse});
+        cube->setScale(0.2f);
+        cube->setPosition(0.5f, 0.8f, 0.2f);
+        cube->setRotation(glm::vec3{45.0f});
+
+        auto plane = std::make_shared<Mirror>(AssetFactory::getMeshes()->plane,
+            TextureArray{AssetFactory::getTextures()->marbleDiffuse});
+        plane->setScale(1.5f);
+
+        auto wall = std::make_shared<Mirror>(AssetFactory::getMeshes()->cube,
+            TextureArray{AssetFactory::getTextures()->marbleDiffuse});
+        wall->setPosition(1.7f, 1.5f, 0.0f);
+        wall->setScale(glm::vec3{0.2f, 1.5f, 1.5f});
+        wall->setReflectionNormal(glm::vec3{-1.0f, 0.0f, 0.0f});
         
         _renderPipeline = new Pipeline(defaultFrameBufferResolution());
-        _renderPipeline->addRenderable(_object.get());
-        _renderPipeline->addRenderable(_plane.get());
-        _objects.push_back(_object);
+        _renderPipeline->attach(object.get());
+        _renderPipeline->attach(cube.get());
+        _renderPipeline->attach(plane.get());
+        _renderPipeline->attach(wall.get());
+        object->stage();
+        cube->stage();
+        plane->stage();
+        wall->stage();
+        _objects.push_back(object);
+        _objects.push_back(cube);
+        _objects.push_back(plane);
+        _objects.push_back(wall);
 
         printf("%s\n", glGetString(GL_VERSION));
     }
@@ -35,11 +58,6 @@ public:
 
     virtual void update(float dt) override
     {
-        /*for(auto o : _objects)
-        {
-            o->update(dt);
-            o->setRotation(o->rotation() + glm::vec3{8.0f * dt});
-        }*/
         float t = time() * 0.5f;
         float camRadius = 3.0f;
         float camX = camRadius * cos(t);
@@ -57,8 +75,6 @@ public:
 private:
     Pipeline* _renderPipeline{nullptr};
     std::vector<std::shared_ptr<lithium::Object>> _objects;
-    std::shared_ptr<lithium::Object> _object;
-    std::shared_ptr<Mirror> _plane;
 };
 
 int main(int argc, const char* argv[])
