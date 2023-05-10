@@ -19,6 +19,7 @@ public:
     struct Textures
     {
         std::shared_ptr<lithium::ImageTexture> logoDiffuse;
+        std::shared_ptr<lithium::Texture<uint8_t>> mnistSamplesDiffuse;
     } _textures;
 
     struct Objects
@@ -30,6 +31,12 @@ public:
     {
         std::shared_ptr<lithium::Font> righteousFont;
     } _fonts;
+
+    std::vector<uint8_t> _mnistImages;
+    std::vector<uint8_t> _mnistLabels;
+    size_t _mnistImageWidth;
+    size_t _mnistImageHeight;
+    size_t _mnistImageCount;
 
     AssetFactory();
     virtual ~AssetFactory() noexcept;
