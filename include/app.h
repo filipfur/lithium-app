@@ -1,8 +1,13 @@
 #pragma once
 
+#include <set>
 #include "glapplication.h"
 #include "pipeline.h"
 #include "glmesh.h"
+#include "glentity.h"
+#include "ecssystem.h"
+#include "component.h"
+#include "collisionsystem.h"
 
 class App : public lithium::Application
 {
@@ -17,7 +22,20 @@ public:
 
 private:
     std::shared_ptr<Pipeline> _pipeline{nullptr};
-    std::vector<std::shared_ptr<lithium::Object>> _objects;
+    std::set<ecs::Entity*> _entities;
     float _cameraAngle{0.0f};
     std::shared_ptr<lithium::Input::KeyCache> _keyCache;
+
+    ecs::System<const component::Time, const component::Gravity, component::RigidBody> _gravitySystem;
+
+    ecs::System<const component::Time, component::Force, component::RigidBody> _forceSystem;
+
+    ecs::System<const component::Time, component::RigidBody, lithium::Entity::Translation> _physicsSystem;
+
+    ecs::System<const lithium::Entity::Translation,
+        const lithium::Entity::Rotation,
+        const lithium::Entity::Scale,
+        lithium::Entity::ModelMatrix> _transformationSystem;
+    
+    CollisionSystem _collisionSystem;
 };

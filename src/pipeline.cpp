@@ -1,5 +1,6 @@
 #include "pipeline.h"
 #include "shape.h"
+#include "glentity.h"
 
 Pipeline::Pipeline(const glm::ivec2& resolution) : lithium::RenderPipeline{resolution},
     _camera{new lithium::SimpleCamera(glm::perspective(glm::radians(45.0f), (float)resolution.x / (float)resolution.y, 0.1f, 100.0f))},
@@ -28,8 +29,9 @@ Pipeline::Pipeline(const glm::ivec2& resolution) : lithium::RenderPipeline{resol
     _screenMesh = std::shared_ptr<lithium::Mesh>(shape::Plane());
 
     _mainGroup = createRenderGroup([this](lithium::Renderable* renderable) -> bool {
-        return dynamic_cast<lithium::Object*>(renderable);
+        return !renderable->hasAttachments();
     });
+
     _mainStage = addRenderStage(std::make_shared<lithium::RenderStage>(_frameBuffer, glm::ivec4{0, 0, resolution.x, resolution.y}, [this](){
         clearColor(0.8f, 1.0f, 0.8f, 1.0f);
         clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
