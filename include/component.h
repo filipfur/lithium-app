@@ -1,6 +1,6 @@
 #pragma once
 
-#include "component.h"
+#include "ecscomponent.h"
 #include "glgeometry.h"
 
 struct Time
@@ -22,7 +22,6 @@ struct Collider
 struct Gravity
 {
     float acceleration{9.81f};
-    bool active{true};
 };
 
 struct RigidBody
@@ -32,6 +31,7 @@ struct RigidBody
     glm::vec3 force;
     float drag{0.5f};
     bool dynamic{true};
+    bool onGround{false};
 };
 
 namespace component

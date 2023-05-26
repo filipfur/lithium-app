@@ -32,7 +32,6 @@ App::App() : Application{"lithium-lab", glm::ivec2{1440, 800}, lithium::Applicat
         cube->stage();
         component::Time::attach(*cube);
         component::Collider::attach(*cube);
-        //component::Force::attach(*cube);
         component::RigidBody::attach(*cube);
         component::Gravity::attach(*cube);
         glm::vec3 scaleHalf = cube->scale();
@@ -47,23 +46,9 @@ App::App() : Application{"lithium-lab", glm::ivec2{1440, 800}, lithium::Applicat
     cube->stage();
     component::Time::attach(*cube);
     component::Collider::attach(*cube);
-    //component::Force::attach(*cube);
     component::RigidBody::attach(*cube);
     glm::vec3 scaleHalf = cube->scale();
     cube->get<component::Collider>()->geometry = new lithium::AABB(cube->position(), -scaleHalf, scaleHalf);
-    //component::Gravity::attach(*cube);
-    /*auto planeMesh = std::shared_ptr<lithium::Mesh>(shape::Plane());
-    unsigned char blueColor[] = {0x00, 0xA0, 0xFF};
-    auto blueTexture = std::make_shared<lithium::Texture<unsigned char>>(
-        blueColor, 1, 1, GL_UNSIGNED_BYTE, GL_RGB, GL_RGB
-    );
-    auto plane = new lithium::Entity(planeMesh,
-        std::vector<lithium::Object::TexturePointer>{blueTexture});
-    plane->setScale(glm::vec3{2.0f});
-    _pipeline->attach(plane);
-    _entities.emplace(plane);
-    plane->setRotation(glm::angleAxis(glm::pi<float>() * 0.5f, glm::vec3{1.0f, 0.0f, 0.0f}));
-    plane->stage();*/
 
     _keyCache = std::make_shared<lithium::Input::KeyCache>(
         std::initializer_list<int>{GLFW_KEY_LEFT, GLFW_KEY_RIGHT});
@@ -89,18 +74,13 @@ App::~App() noexcept
 
 void App::update(float dt)
 {
-    /*for(auto o : _entities)
-    {
-        o->update(dt);
-    }*/
-
     auto& time = component::Time::get();
     time.seconds += dt;
     time.delta = dt;
     component::Time::set(time);
 
     _gravitySystem.update(_entities, [](ecs::Entity& entity, const Time& time, const Gravity& gravity, RigidBody& rigidBody) {
-        if(gravity.active)
+        if(!rigidBody.onGround)
         {
             rigidBody.force = glm::vec3{0.0f, -9.81f * rigidBody.mass, 0.0f};
         }
@@ -119,11 +99,15 @@ void App::update(float dt)
     });
 
     _physicsSystem.update(_entities, [](ecs::Entity& entity, const Time& time, RigidBody& rigidBody, glm::vec3& translation) {
-        glm::vec3 acceleration = rigidBody.force / rigidBody.mass;
-        rigidBody.velocity += acceleration * time.delta;
-        rigidBody.velocity *= 1.0f - rigidBody.drag * time.delta;
-        translation += rigidBody.velocity * time.delta + 0.5f * acceleration * time.delta * time.delta;
-        rigidBody.force = glm::vec3{0.0f};
+        if(rigidBody.dynamic)
+        {
+            glm::vec3 acceleration = rigidBody.force / rigidBody.mass;
+            rigidBody.velocity += acceleration * time.delta;
+            rigidBody.velocity *= 1.0f - rigidBody.drag * time.delta;
+            translation += rigidBody.velocity * time.delta + 0.5f * acceleration * time.delta * time.delta;
+            rigidBody.force = glm::vec3{0.0f};
+            rigidBody.onGround = false;
+        }
     });
 
     _transformationSystem.update(_entities, [](ecs::Entity& entity,
@@ -132,10 +116,6 @@ void App::update(float dt)
         const glm::vec3& scale,
         glm::mat4& modelMatrix){
         modelMatrix = glm::scale(glm::translate(glm::mat4{1.0f}, position) * glm::toMat4(rotation), scale);
-        /*std::cout << "updating model matrix." << std::endl;
-        std::cout << " pos:" << utility::GLMtoString(position, 3, 2) << std::endl;
-        std::cout << " rotation:" << utility::GLMtoString(rotation, 4, 2) << std::endl;
-        std::cout << " scale:" << utility::GLMtoString(scale, 3, 2) << std::endl;*/
     });
 
     _collisionSystem.tick(_entities);
