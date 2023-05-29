@@ -53,6 +53,8 @@ void AssetFactory::loadTextures()
 {
     AssetFactory& instance = getInstance();
     instance._textures.logoDiffuse.reset((lithium::ImageTexture*)lithium::ImageTexture::load("assets/Kraxbox_logo_lithium_metal_2ff2069c-b84a-426c-bf92-e9831105a5df.png", GL_SRGB_ALPHA, GL_RGBA)->setFilter(GL_NEAREST));
+    instance._textures.checkboard.reset((lithium::ImageTexture*)lithium::ImageTexture::load("assets/checkboard.png", GL_RGBA, GL_RGBA)->setFilter(GL_NEAREST)->setWrap(GL_REPEAT));
+    instance._textures.righteousDiffuse.reset(lithium::ImageTexture::load("assets/righteous/Righteous.png", GL_RGB, GL_RGBA, 1, false));
 }
 
 void AssetFactory::loadObjects()
@@ -63,6 +65,7 @@ void AssetFactory::loadObjects()
 void AssetFactory::loadFonts()
 {
     AssetFactory& instance = getInstance();
+    instance._fonts.righteousFont = std::make_shared<lithium::Font>(instance._textures.righteousDiffuse, "assets/righteous/Righteous.json");
 }
 
 const AssetFactory::Meshes* AssetFactory::getMeshes()

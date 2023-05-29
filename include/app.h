@@ -3,6 +3,7 @@
 #include "glapplication.h"
 #include "pipeline.h"
 #include "glmesh.h"
+#include "glcanvas.h"
 
 class App : public lithium::Application
 {
@@ -20,4 +21,6 @@ private:
     std::vector<std::shared_ptr<lithium::Object>> _objects;
     float _cameraAngle{0.0f};
     std::shared_ptr<lithium::Input::KeyCache> _keyCache;
+    std::shared_ptr<lithium::Canvas> _canvas;
+    glm::vec2 _dragPosition{0.0f};
 };

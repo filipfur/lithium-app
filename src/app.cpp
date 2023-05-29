@@ -1,6 +1,8 @@
 #include "app.h"
 
+#include "glplane.h"
 #include "assetfactory.h"
+#include "utility.h"
 
 App::App() : Application{"lithium-lab", glm::ivec2{1440, 800}, lithium::Application::Mode::MULTISAMPLED_4X, false}
 {
@@ -26,6 +28,49 @@ App::App() : Application{"lithium-lab", glm::ivec2{1440, 800}, lithium::Applicat
         return true;
     });
 
+    auto res = defaultFrameBufferResolution();
+
+    glm::vec2 canvasDim{2048.0f};
+    //glm::vec2 canvasDim{res};
+
+    _canvas = std::make_shared<lithium::Canvas>(res, canvasDim);
+    auto frame = std::make_shared<lithium::Frame>(_canvas.get(), glm::vec2{64.0f});
+    frame->setColor(glm::vec3{1.0f, 0.0f, 0.0f});
+    frame->setPosition(glm::vec3{res.x * 0.5f - 32.0f, res.y * 0.5f - 32.0f, 0.0f});
+    //frame->setMesh(AssetFactory::getMeshes()->cube);
+    _canvas->addFrame(frame);
+
+    _canvas->setMesh(std::shared_ptr<lithium::Mesh>(lithium::Plane2D(glm::vec2{0.5f}, glm::vec2{64.0f})));
+    _canvas->setTextures(std::vector<lithium::Object::TexturePointer>{AssetFactory::getTextures()->checkboard});
+
+    /*auto myText = _canvas->textRenderer().createText(AssetFactory::getFonts()->righteousFont, "Hello world!", 1.0f);
+    myText->setPosition(glm::vec3{0.0f, 0.0f, 0.0f});
+    myText->setScale(1.0f);*/
+
+    auto frame2 = std::make_shared<lithium::Frame>(_canvas.get(), glm::vec2{256.0f});
+    //frame2->setOpacity(0.5f);
+    frame2->setColor(glm::vec3{0.0f, 0.0f, 1.0f});
+    frame2->setPosition(glm::vec3{256.0f, 128.0f, 0.0f});
+    _canvas->addFrame(frame2);
+
+    auto frame3 = std::make_shared<lithium::Frame>(_canvas.get(), glm::vec2{128.0f});
+    //frame3->setPosition(glm::vec3{0.0f, 64.0f, 0.0f});
+    frame2->addFrame(frame3);
+    
+    frame2->createFrame(glm::vec2{128.0f})->setColor(glm::vec3{0.0f, 1.0f, 0.0f})->setObjectName("frame4");
+
+    _canvas->setObjectName("_canvas");
+    frame->setObjectName("frame");
+    frame2->setObjectName("frame2");
+    frame3->setObjectName("frame3");
+
+    input()->setDragCallback([this](int button, int modifiers, const glm::vec2& start, const glm::vec2& current, const glm::vec2& delta, bool completed) {
+        if(button == GLFW_MOUSE_BUTTON_LEFT)
+        {
+            _canvas->move(glm::vec2(-delta.x, delta.y));
+        }
+    });
+
     printf("%s\n", glGetString(GL_VERSION));
 }
 
@@ -43,7 +88,6 @@ void App::update(float dt)
         o->setRotation(o->rotation() + glm::vec3{8.0f * dt});
     }
 
-
     if(_keyCache->isPressed(GLFW_KEY_LEFT))
     {
         _cameraAngle -= glm::pi<float>() * 0.5f * dt;
@@ -59,8 +103,24 @@ void App::update(float dt)
     float camZ = sin(_cameraAngle) * cameraRadius;
 
     _pipeline->camera()->setPosition(glm::vec3{camX, camY, camZ});
-    _pipeline->camera()->update(dt);
-    _pipeline->render();
+    //_pipeline->render();
+
+    _canvas->update(dt);
+
+    /*
+    Wiggle canvas!
+    static float r{0.0f};
+    static int currS{0};
+    int iTime = static_cast<int>(time());
+    if(iTime != currS)
+    {
+        currS = iTime;
+        r = utility::randn(-glm::pi<float>(), glm::pi<float>());
+    }
+    glm::vec2 v = glm::vec2{cos(r), sin(r)};
+    _canvas->move(v * 64.0f * dt);*/
+
+    _canvas->renderCanvas();
 }
 
 void App::onFramebufferResized(int width, int height)
