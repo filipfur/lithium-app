@@ -27,11 +27,14 @@ struct Gravity
 struct RigidBody
 {
     float mass{1.0f};
+    float inverseMass{1.0f};
     glm::vec3 velocity;
     glm::vec3 force;
+    glm::vec3 correction{0.0f};
     float drag{0.5f};
     bool dynamic{true};
     bool onGround{false};
+    float restitution{0.5f};
 };
 
 namespace component

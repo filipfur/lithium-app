@@ -23,7 +23,7 @@ public:
 private:
     std::shared_ptr<Pipeline> _pipeline{nullptr};
     std::set<ecs::Entity*> _entities;
-    float _cameraAngle{0.0f};
+    float _cameraAngle{glm::pi<float>() * 0.25f};
     std::shared_ptr<lithium::Input::KeyCache> _keyCache;
 
     ecs::System<const component::Time, const component::Gravity, component::RigidBody> _gravitySystem;
@@ -38,4 +38,5 @@ private:
         lithium::Entity::ModelMatrix> _transformationSystem;
     
     CollisionSystem _collisionSystem;
+    std::vector<std::shared_ptr<lithium::Entity>> _objects;
 };

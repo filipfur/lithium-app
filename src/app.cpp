@@ -6,6 +6,28 @@
 #include "glgeometry.h"
 #include "glaabb.h"
 
+std::shared_ptr<lithium::Entity> createCube(const glm::vec3& position, const glm::vec3& scale)
+{
+    auto cube = std::make_shared<lithium::Entity>(AssetFactory::getMeshes()->cube,
+    std::vector<lithium::Object::TexturePointer>{AssetFactory::getTextures()->logoDiffuse});
+    cube->setPosition(position);
+    // rotate randomly along all axis
+    float pi2 = glm::pi<float>() * 2.0f;
+    /*cube->setRotation(glm::angleAxis(utility::randn(0.0f, pi2), glm::vec3{1.0f, 0.0f, 0.0f})
+        * glm::angleAxis(utility::randn(0.0f, pi2), glm::vec3{0.0f, 1.0f, 0.0f})
+        * glm::angleAxis(utility::randn(0.0f, pi2), glm::vec3{0.0f, 0.0f, 1.0f}));*/
+    cube->setScale(scale);
+    component::Time::attach(*cube);
+    component::Collider::attach(*cube);
+    component::RigidBody::attach(*cube);
+    auto rb = cube->get<component::RigidBody>();
+    rb->mass = 1000.0f * 8.0f * cube->scale().x * cube->scale().y * cube->scale().z;
+    rb->inverseMass = 1.0f / rb->mass;
+    glm::vec3 scaleHalf = cube->scale();
+    cube->get<component::Collider>()->geometry = new lithium::AABB(cube->position(), -scaleHalf, scaleHalf);
+    return cube;
+}
+
 App::App() : Application{"lithium-lab", glm::ivec2{1440, 800}, lithium::Application::Mode::MULTISAMPLED_4X, false}
 {
     AssetFactory::loadMeshes();
@@ -17,38 +39,22 @@ App::App() : Application{"lithium-lab", glm::ivec2{1440, 800}, lithium::Applicat
 
     for(int i{0}; i < 20; ++i)
     {
-        auto cube = new lithium::Entity(AssetFactory::getMeshes()->cube,
-            std::vector<lithium::Object::TexturePointer>{AssetFactory::getTextures()->logoDiffuse});
-        cube->setPosition(glm::vec3{0.0f, 2.0f, 0.0f}
-            + glm::vec3{utility::randn(-1.0f, 1.0f), utility::randn(-1.0f, 1.0f), utility::randn(-1.0f, 1.0f)});
-        _pipeline->attach(cube);
-        _entities.emplace(cube);
-        // rotate randomly along all axis
-        float pi2 = glm::pi<float>() * 2.0f;
-        /*cube->setRotation(glm::angleAxis(utility::randn(0.0f, pi2), glm::vec3{1.0f, 0.0f, 0.0f})
-            * glm::angleAxis(utility::randn(0.0f, pi2), glm::vec3{0.0f, 1.0f, 0.0f})
-            * glm::angleAxis(utility::randn(0.0f, pi2), glm::vec3{0.0f, 0.0f, 1.0f}));*/
-        cube->setScale(glm::vec3{utility::randn(0.1f, 0.2f)});
-        cube->stage();
-        component::Time::attach(*cube);
-        component::Collider::attach(*cube);
-        component::RigidBody::attach(*cube);
+        auto cube = createCube(glm::vec3{0.0f, 3.0f, 0.0f}
+            + glm::vec3{utility::randn(-1.0f, 1.0f), utility::randn(-1.0f, 1.0f), utility::randn(-1.0f, 1.0f)},
+            glm::vec3{utility::randn(0.1f, 0.2f)});
         component::Gravity::attach(*cube);
-        glm::vec3 scaleHalf = cube->scale();
-        cube->get<component::Collider>()->geometry = new lithium::AABB(cube->position(), -scaleHalf, scaleHalf);
+        _pipeline->attach(cube.get());
+        _entities.emplace(cube.get());
+        _objects.push_back(cube);
+        cube->stage();
     }
 
-    auto cube = new lithium::Entity(AssetFactory::getMeshes()->cube,
-            std::vector<lithium::Object::TexturePointer>{AssetFactory::getTextures()->logoDiffuse});
-    cube->setPosition(glm::vec3{0.0f, -1.0f, 0.0f});
-    _pipeline->attach(cube);
-    _entities.emplace(cube);
+    auto cube = createCube(glm::vec3{0.0f, -1.0f, 0.0f}, glm::vec3{1.0f});
+    _pipeline->attach(cube.get());
+    _entities.emplace(cube.get());
+    _objects.push_back(cube);
     cube->stage();
-    component::Time::attach(*cube);
-    component::Collider::attach(*cube);
-    component::RigidBody::attach(*cube);
-    glm::vec3 scaleHalf = cube->scale();
-    cube->get<component::Collider>()->geometry = new lithium::AABB(cube->position(), -scaleHalf, scaleHalf);
+    cube->get<component::RigidBody>()->dynamic = false;
 
     _keyCache = std::make_shared<lithium::Input::KeyCache>(
         std::initializer_list<int>{GLFW_KEY_LEFT, GLFW_KEY_RIGHT});
@@ -74,6 +80,7 @@ App::~App() noexcept
 
 void App::update(float dt)
 {
+    dt *= 0.2f;
     auto& time = component::Time::get();
     time.seconds += dt;
     time.delta = dt;
@@ -101,6 +108,8 @@ void App::update(float dt)
     _physicsSystem.update(_entities, [](ecs::Entity& entity, const Time& time, RigidBody& rigidBody, glm::vec3& translation) {
         if(rigidBody.dynamic)
         {
+            translation += rigidBody.correction;
+            rigidBody.correction.x = rigidBody.correction.y = rigidBody.correction.z = 0.0f;
             glm::vec3 acceleration = rigidBody.force / rigidBody.mass;
             rigidBody.velocity += acceleration * time.delta;
             rigidBody.velocity *= 1.0f - rigidBody.drag * time.delta;
@@ -135,7 +144,6 @@ void App::update(float dt)
     float camZ = sin(_cameraAngle) * cameraRadius;
 
     _pipeline->camera()->setPosition(glm::vec3{camX, camY, camZ});
-    _pipeline->camera()->update(dt);
     _pipeline->render();
 }
 
