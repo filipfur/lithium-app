@@ -2,20 +2,37 @@
 #include "shape.h"
 
 Pipeline::Pipeline(const glm::ivec2& resolution) : lithium::RenderPipeline{resolution},
-    _camera{new lithium::SimpleCamera(glm::perspective(glm::radians(45.0f), (float)resolution.x / (float)resolution.y, 0.1f, 100.0f))},
+    _camera{new lithium::SimpleCamera(glm::perspective(glm::radians(45.0f), (float)resolution.x / (float)resolution.y, 0.01f, 100.0f))},
     _frameBuffer{std::make_shared<lithium::FrameBuffer>(resolution)}
 {
     enableDepthTesting();
     enableBlending();
+    //enableFaceCulling();
     blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     enableMultisampling();
 
-    _blockShader = std::make_shared<lithium::ShaderProgram>("shaders/object.vert", "shaders/object.frag");
+    /*_blockShader = std::make_shared<lithium::ShaderProgram>("shaders/object.vert", "shaders/object.frag");
     _blockShader->setUniform("u_texture_0", 0);
-    _blockShader->setUniform("u_projection", _camera->projection());
+    _blockShader->setUniform("u_projection", _camera->projection());*/
     _screenShader = std::make_shared<lithium::ShaderProgram>("shaders/screenshader.vert", "shaders/screenshader.frag");
     _msaaShader = std::make_shared<lithium::ShaderProgram>("shaders/screenshader.vert", "shaders/msaa.frag");
     _msaaShader->setUniform("u_texture", 0);
+
+    _passthruGeometryShader = std::make_shared<lithium::ShaderProgram>(
+        "shaders/object.vert", "shaders/object.frag", "shaders/object.geom");
+    _passthruGeometryShader->setUniform("u_texture_0", 0);
+    _passthruGeometryShader->setUniform("u_projection", _camera->projection());
+
+    _explodeGeometryShader = std::make_shared<lithium::ShaderProgram>(
+        "shaders/object.vert", "shaders/object.frag", "shaders/explode.geom");
+    _explodeGeometryShader->setUniform("u_texture_0", 0);
+    _explodeGeometryShader->setUniform("u_projection", _camera->projection());
+
+    _normalsGeometryShader = std::make_shared<lithium::ShaderProgram>(
+        "shaders/normals.vert", "shaders/color.frag", "shaders/normals.geom");
+    _normalsGeometryShader->setUniform("u_texture_0", 0);
+    _normalsGeometryShader->setUniform("u_projection", _camera->projection());
+
     _camera->setPosition(glm::vec3{3.0f, 3.0f, 3.0f});
     _camera->setTarget(glm::vec3{0.0f});
 
@@ -27,11 +44,15 @@ Pipeline::Pipeline(const glm::ivec2& resolution) : lithium::RenderPipeline{resol
 
     _screenMesh = std::shared_ptr<lithium::Mesh>(shape::Plane());
 
+    _explodeGroup = createRenderGroup([this](lithium::Renderable* renderable) -> bool {
+        return renderable->groupId() == 1337;
+    });
+
     _mainGroup = createRenderGroup([this](lithium::Renderable* renderable) -> bool {
-        return dynamic_cast<lithium::Object*>(renderable);
+        return !renderable->hasAttachments();
     });
     _mainStage = addRenderStage(std::make_shared<lithium::RenderStage>(_frameBuffer, glm::ivec4{0, 0, resolution.x, resolution.y}, [this](){
-        clearColor(0.8f, 1.0f, 0.8f, 1.0f);
+        clearColor(0.0f, 0.0f, 0.0f, 1.0f);
         clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         _screenShader->use();
@@ -40,9 +61,17 @@ Pipeline::Pipeline(const glm::ivec2& resolution) : lithium::RenderPipeline{resol
         disableDepthWriting();
         _screenMesh->draw();
         enableDepthWriting();
-        _blockShader->setUniform("u_view", _camera->view());
-        _blockShader->setUniform("u_time", 0.0f);
-        _mainGroup->render(_blockShader.get());
+        _passthruGeometryShader->setUniform("u_view", _camera->view());
+        _mainGroup->render(_passthruGeometryShader);
+
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        glLineWidth(4.0f);
+        _normalsGeometryShader->setUniform("u_view", _camera->view());
+        _mainGroup->render(_normalsGeometryShader);
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+        _explodeGeometryShader->setUniform("u_view", _camera->view());
+        _explodeGroup->render(_explodeGeometryShader);
     }));
 
     _finalStage = addRenderStage(std::make_shared<lithium::RenderStage>(nullptr, glm::ivec4{0, 0, resolution.x, resolution.y}, [this](){
@@ -60,7 +89,9 @@ Pipeline::Pipeline(const glm::ivec2& resolution) : lithium::RenderPipeline{resol
 
 Pipeline::~Pipeline()
 {
-    _blockShader = nullptr;
+    //_blockShader = nullptr;
+    _passthruGeometryShader = nullptr;
+    _explodeGeometryShader = nullptr;
     _screenShader = nullptr;
     _msaaShader = nullptr;
     _screenMesh = nullptr;
