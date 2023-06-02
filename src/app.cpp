@@ -1,6 +1,6 @@
 #include "app.h"
-
 #include "assetfactory.h"
+#include "glplane.h"
 
 App::App() : Application{"lithium-lab", glm::ivec2{1440, 800}, lithium::Application::Mode::MULTISAMPLED_4X, false}
 {
@@ -13,13 +13,14 @@ App::App() : Application{"lithium-lab", glm::ivec2{1440, 800}, lithium::Applicat
 
     auto cube = std::make_shared<lithium::Object>(AssetFactory::getMeshes()->cube,
         std::vector<lithium::Object::TexturePointer>{AssetFactory::getTextures()->logoDiffuse});
-    cube->setPosition(glm::vec3{0.0f, 0.0f, -1.5f});
+    cube->setPosition(glm::vec3{-2.5f, 0.0f, 0.0f});
+    cube->setScale(0.5f);
     _pipeline->attach(cube.get());
     _objects.push_back(cube);
     cube->stage();
 
     auto cube2 = std::shared_ptr<lithium::Object>(cube->clone());
-    cube2->setPosition(glm::vec3{0.0f, 0.0f, 1.5f});
+    cube2->setPosition(glm::vec3{2.5f, 0.0f, 0.0f});
     cube2->setShaderCallback([this](lithium::Renderable* r, lithium::ShaderProgram* shaderProgram) {
         shaderProgram->setTime(time());
     });
@@ -27,6 +28,19 @@ App::App() : Application{"lithium-lab", glm::ivec2{1440, 800}, lithium::Applicat
     _pipeline->attach(cube2.get());
     _objects.push_back(cube2);
     cube2->stage();
+
+    auto mesh = std::shared_ptr<lithium::Mesh>(
+        new lithium::Mesh({lithium::VertexArrayBuffer::AttributeType::VEC3},
+        {0.0f, 0.0f, 0.0f})
+    );
+    mesh->setDrawMode(GL_POINTS);
+
+    auto plane = std::make_shared<lithium::Object>(mesh,
+        std::vector<lithium::Object::TexturePointer>{AssetFactory::getTextures()->logoDiffuse});
+    plane->setGroupId(2);
+    _pipeline->attach(plane.get());
+    _objects.push_back(plane);
+    plane->stage();
 
     _keyCache = std::make_shared<lithium::Input::KeyCache>(
         std::initializer_list<int>{GLFW_KEY_LEFT, GLFW_KEY_RIGHT});
@@ -69,9 +83,9 @@ void App::update(float dt)
     }
 
     static const float cameraRadius = 6.0f;
-    float camX = cos(_cameraAngle) * cameraRadius;
+    float camX = sin(_cameraAngle) * cameraRadius;
     static const float camY = cameraRadius * 0.5f;
-    float camZ = sin(_cameraAngle) * cameraRadius;
+    float camZ = cos(_cameraAngle) * cameraRadius;
 
     _pipeline->camera()->setPosition(glm::vec3{camX, camY, camZ});
     _pipeline->render();

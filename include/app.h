@@ -18,6 +18,6 @@ public:
 private:
     std::shared_ptr<Pipeline> _pipeline{nullptr};
     std::vector<std::shared_ptr<lithium::Object>> _objects;
-    float _cameraAngle{0.0f};
+    float _cameraAngle{glm::pi<float>() * 0.25f};
     std::shared_ptr<lithium::Input::KeyCache> _keyCache;
 };

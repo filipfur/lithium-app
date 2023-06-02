@@ -1,12 +1,12 @@
 #version 330 core
 layout (triangles) in;
-layout (line_strip, max_vertices = 8) out;
+layout (line_strip, max_vertices = 2) out;
 
 in VS_OUT {
     vec3 normal;
 } gs_in[];
 
-const float MAGNITUDE = 0.2;
+const float MAGNITUDE = 0.5;
   
 uniform mat4 u_projection;
 
@@ -22,9 +22,9 @@ void GenerateLine(int index)
 
 void main()
 {
-    GenerateLine(0); // first vertex normal
+    /*GenerateLine(0); // first vertex normal
     GenerateLine(1); // second vertex normal
-    GenerateLine(2); // third vertex normal
+    GenerateLine(2); // third vertex normal*/
 
     vec3 center = (gl_in[0].gl_Position.xyz + gl_in[1].gl_Position.xyz + gl_in[2].gl_Position.xyz) / 3.0;
 

@@ -11,25 +11,32 @@ Pipeline::Pipeline(const glm::ivec2& resolution) : lithium::RenderPipeline{resol
     blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     enableMultisampling();
 
-    /*_blockShader = std::make_shared<lithium::ShaderProgram>("shaders/object.vert", "shaders/object.frag");
+    _blockShader = std::make_shared<lithium::ShaderProgram>("shaders/object.vert", "shaders/object.frag");
     _blockShader->setUniform("u_texture_0", 0);
-    _blockShader->setUniform("u_projection", _camera->projection());*/
+    _blockShader->setUniform("u_projection", _camera->projection());
+
     _screenShader = std::make_shared<lithium::ShaderProgram>("shaders/screenshader.vert", "shaders/screenshader.frag");
+
     _msaaShader = std::make_shared<lithium::ShaderProgram>("shaders/screenshader.vert", "shaders/msaa.frag");
     _msaaShader->setUniform("u_texture", 0);
 
     _passthruGeometryShader = std::make_shared<lithium::ShaderProgram>(
-        "shaders/object.vert", "shaders/object.frag", "shaders/object.geom");
+        "shaders/geometry.vert", "shaders/object.frag", "shaders/object.geom");
     _passthruGeometryShader->setUniform("u_texture_0", 0);
     _passthruGeometryShader->setUniform("u_projection", _camera->projection());
 
+    _bendGeometryShader = std::make_shared<lithium::ShaderProgram>(
+        "shaders/bend.vert", "shaders/object.frag", "shaders/bend.geom");
+    _bendGeometryShader->setUniform("u_texture_0", 0);
+    _bendGeometryShader->setUniform("u_projection", _camera->projection());
+
     _explodeGeometryShader = std::make_shared<lithium::ShaderProgram>(
-        "shaders/object.vert", "shaders/object.frag", "shaders/explode.geom");
+        "shaders/geometry.vert", "shaders/object.frag", "shaders/explode.geom");
     _explodeGeometryShader->setUniform("u_texture_0", 0);
     _explodeGeometryShader->setUniform("u_projection", _camera->projection());
 
     _normalsGeometryShader = std::make_shared<lithium::ShaderProgram>(
-        "shaders/normals.vert", "shaders/color.frag", "shaders/normals.geom");
+        "shaders/geometry.vert", "shaders/color.frag", "shaders/normals.geom");
     _normalsGeometryShader->setUniform("u_texture_0", 0);
     _normalsGeometryShader->setUniform("u_projection", _camera->projection());
 
@@ -48,6 +55,10 @@ Pipeline::Pipeline(const glm::ivec2& resolution) : lithium::RenderPipeline{resol
         return renderable->groupId() == 1337;
     });
 
+    _bendGroup = createRenderGroup([this](lithium::Renderable* renderable) {
+        return renderable->groupId() == 2;
+    });
+
     _mainGroup = createRenderGroup([this](lithium::Renderable* renderable) -> bool {
         return !renderable->hasAttachments();
     });
@@ -61,8 +72,12 @@ Pipeline::Pipeline(const glm::ivec2& resolution) : lithium::RenderPipeline{resol
         disableDepthWriting();
         _screenMesh->draw();
         enableDepthWriting();
-        _passthruGeometryShader->setUniform("u_view", _camera->view());
-        _mainGroup->render(_passthruGeometryShader);
+
+        _blockShader->setUniform("u_view", _camera->view());
+        _mainGroup->render(_blockShader);
+
+        _bendGeometryShader->setUniform("u_view", _camera->view());
+        _bendGroup->render(_bendGeometryShader);
 
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         glLineWidth(4.0f);
@@ -91,6 +106,7 @@ Pipeline::~Pipeline()
 {
     //_blockShader = nullptr;
     _passthruGeometryShader = nullptr;
+    _bendGeometryShader = nullptr;
     _explodeGeometryShader = nullptr;
     _screenShader = nullptr;
     _msaaShader = nullptr;

@@ -22,11 +22,14 @@ private:
     std::shared_ptr<lithium::ShaderProgram> _msaaShader{nullptr};
     std::shared_ptr<lithium::ShaderProgram> _screenShader{nullptr};
     std::shared_ptr<lithium::ShaderProgram> _passthruGeometryShader{nullptr};
+    std::shared_ptr<lithium::ShaderProgram> _bendGeometryShader{nullptr};
+    std::shared_ptr<lithium::ShaderProgram> _foldShader{nullptr};
     std::shared_ptr<lithium::ShaderProgram> _explodeGeometryShader{nullptr};
     std::shared_ptr<lithium::ShaderProgram> _normalsGeometryShader{nullptr};
     std::shared_ptr<lithium::SimpleCamera> _camera{nullptr};
 
     std::shared_ptr<lithium::RenderGroup> _explodeGroup;
+    std::shared_ptr<lithium::RenderGroup> _bendGroup;
     std::shared_ptr<lithium::RenderGroup> _mainGroup;
     std::shared_ptr<lithium::RenderStage> _mainStage;
     std::shared_ptr<lithium::RenderStage> _finalStage;

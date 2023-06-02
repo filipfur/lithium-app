@@ -39,7 +39,10 @@ void calcLight(inout float diffuse, inout float specular, inout float fresnel, i
 
 void main()
 {
+
+    fragColor = texture(u_texture_0, texCoord);
     
+    return;
     vec4 color = texture(u_texture_0, texCoord) * u_color;
     vec3 ambient = color.rgb * 0.2;
     float exposure = 1.0;
