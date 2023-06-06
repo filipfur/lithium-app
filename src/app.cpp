@@ -33,36 +33,67 @@ App::App() : Application{"lithium-lab", glm::ivec2{1440, 800}, lithium::Applicat
     glm::vec2 canvasDim{2048.0f};
     //glm::vec2 canvasDim{res};
 
-    _canvas = std::make_shared<lithium::Canvas>(res, canvasDim);
-    auto frame = std::make_shared<lithium::Frame>(_canvas.get(), glm::vec2{64.0f});
+    _canvas = std::make_shared<lithium::Canvas>(res);
+    _canvas->loadUI("assets/ui.json");
+
+    auto canvasFrame = _canvas->frameById("canvas");
+    canvasFrame->setMesh(std::shared_ptr<lithium::Mesh>(lithium::Plane2D(glm::vec2{0.5f}, glm::vec2{64.0f})));
+    canvasFrame->setTextures(std::vector<lithium::Object::TexturePointer>{AssetFactory::getTextures()->checkboard});
+    auto classFrame = _canvas->frameById("canvas.0");
+    classFrame->setColor(glm::vec3{0.4f, 0.4f, 0.4f});
+    auto titleFrame = _canvas->frameById("canvas.0.0");
+    titleFrame->setColor(glm::vec3{0.2f, 0.2f, 0.2f});
+    auto myText = titleFrame->createTextRenderer()->createText(AssetFactory::getFonts()->righteousFont, "Frame", 1.0f);
+    myText->setPosition(glm::vec3{-myText->width() * 0.5f, -myText->height() * 0.5f, 0.0f});
+    myText->setScale(1.0f);
+    _canvas->frameById("canvas.0.1")->setColor(glm::vec3{0.1f, 0.1f, 0.1f});
+    _canvas->frameById("canvas.1")->setColor(glm::vec3{0.0f, 0.0f, 1.0f});
+
+    lithium::FrameLayout* layout = classFrame->layout()->clone()->setPosition(glm::vec2{0.0f, -64.0f});
+    _canvas->refreshUI();
+    auto classFrame2 = _canvas->addFrame(layout);
+    classFrame2->setColor(glm::vec3{0.4f, 0.4f, 0.4f});
+    classFrame2->invalidate();
+    _canvas->frameById("canvas.2.1")->setColor(glm::vec3{0.1f, 0.1f, 0.1f});
+    auto titleFrame2 = _canvas->frameById("canvas.2.0");
+    titleFrame2->setColor(titleFrame->color());
+    auto myText2 = titleFrame2->createTextRenderer()->createText(AssetFactory::getFonts()->righteousFont, "FrameRenderer", 1.0f);
+    myText2->setPosition(glm::vec3{-myText2->width() * 0.5f, -myText2->height() * 0.5f, 0.0f});
+
+
+    /*auto canvasFrame = std::make_shared<lithium::Frame>(nullptr, canvasDim);
+
+    _canvas->setFrame(canvasFrame);
+
+    auto frame = std::make_shared<lithium::Frame>(canvasFrame.get(), glm::vec2{64.0f});
     frame->setColor(glm::vec3{1.0f, 0.0f, 0.0f});
     frame->setPosition(glm::vec3{res.x * 0.5f - 32.0f, res.y * 0.5f - 32.0f, 0.0f});
     //frame->setMesh(AssetFactory::getMeshes()->cube);
-    _canvas->addFrame(frame);
+    canvasFrame->addFrame(frame);
 
-    _canvas->setMesh(std::shared_ptr<lithium::Mesh>(lithium::Plane2D(glm::vec2{0.5f}, glm::vec2{64.0f})));
-    _canvas->setTextures(std::vector<lithium::Object::TexturePointer>{AssetFactory::getTextures()->checkboard});
+    canvasFrame->setMesh(std::shared_ptr<lithium::Mesh>(lithium::Plane2D(glm::vec2{0.5f}, glm::vec2{64.0f})));
+    canvasFrame->setTextures(std::vector<lithium::Object::TexturePointer>{AssetFactory::getTextures()->checkboard});
 
-    /*auto myText = _canvas->textRenderer().createText(AssetFactory::getFonts()->righteousFont, "Hello world!", 1.0f);
+    auto myText = _canvas->textRenderer().createText(AssetFactory::getFonts()->righteousFont, "Hello world!", 1.0f);
     myText->setPosition(glm::vec3{0.0f, 0.0f, 0.0f});
-    myText->setScale(1.0f);*/
+    myText->setScale(1.0f);
 
-    auto frame2 = std::make_shared<lithium::Frame>(_canvas.get(), glm::vec2{256.0f});
+    auto frame2 = std::make_shared<lithium::Frame>(canvasFrame.get(), glm::vec2{256.0f});
     //frame2->setOpacity(0.5f);
     frame2->setColor(glm::vec3{0.0f, 0.0f, 1.0f});
     frame2->setPosition(glm::vec3{256.0f, 128.0f, 0.0f});
-    _canvas->addFrame(frame2);
+    canvasFrame->addFrame(frame2);
 
-    auto frame3 = std::make_shared<lithium::Frame>(_canvas.get(), glm::vec2{128.0f});
+    auto frame3 = std::make_shared<lithium::Frame>(canvasFrame.get(), glm::vec2{128.0f});
     //frame3->setPosition(glm::vec3{0.0f, 64.0f, 0.0f});
     frame2->addFrame(frame3);
     
     frame2->createFrame(glm::vec2{128.0f})->setColor(glm::vec3{0.0f, 1.0f, 0.0f})->setObjectName("frame4");
 
-    _canvas->setObjectName("_canvas");
+    canvasFrame->setObjectName("canvasFrame");
     frame->setObjectName("frame");
     frame2->setObjectName("frame2");
-    frame3->setObjectName("frame3");
+    frame3->setObjectName("frame3");*/
 
     input()->setDragCallback([this](int button, int modifiers, const glm::vec2& start, const glm::vec2& current, const glm::vec2& delta, bool completed) {
         if(button == GLFW_MOUSE_BUTTON_LEFT)
@@ -120,7 +151,7 @@ void App::update(float dt)
     glm::vec2 v = glm::vec2{cos(r), sin(r)};
     _canvas->move(v * 64.0f * dt);*/
 
-    _canvas->renderCanvas();
+    _canvas->render();
 }
 
 void App::onFramebufferResized(int width, int height)

@@ -1,0 +1,38 @@
+{
+    "id": "canvas",
+    "mode": "absolute",
+    "margin": [0.0],
+    "padding": [0.0],
+    "dimension": [2048.0, 2048.0],
+    "position": [0.0, 0.0],
+    "children": [
+        {
+            "mode": "absolute",
+            "margin": [0.0],
+            "padding": [1.0],
+            "dimension": [0.0, 0.0],
+            "position": [256.0, 256.0],
+            "children": [
+                {
+                    "mode": "fixed",
+                    "margin": [0.0],
+                    "padding": [8.0],
+                    "dimension": [256.0, 80.0]
+                },
+                {
+                    "mode": "fixed",
+                    "margin": [0.0, 0.0, 0.0, 0.0],
+                    "padding": [8.0],
+                    "dimension": [256.0, 176.0]
+                }
+            ]
+        },
+        {
+            "mode": "absolute",
+            "margin": [0.0],
+            "padding": [8.0],
+            "dimension": [256.0, 256.0],
+            "position": [-256.0, 512.0]
+        }
+    ]
+}
