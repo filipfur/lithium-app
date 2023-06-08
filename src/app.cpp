@@ -35,11 +35,34 @@ App::App() : Application{"lithium-lab", glm::ivec2{1440, 800}, lithium::Applicat
     );
     mesh->setDrawMode(GL_POINTS);
 
+    input()->addPressedCallback(GLFW_KEY_A, [this](int key, int mods) {
+        _rotation--;
+        if(_rotation < 0)
+            _rotation = 3;
+        return true;
+    });
+
+    input()->addPressedCallback(GLFW_KEY_D, [this](int key, int mods) {
+        _rotation++;
+        if(_rotation > 3)
+            _rotation = 0;
+        return true;
+    });
+
     auto plane = std::make_shared<lithium::Object>(mesh,
         std::vector<lithium::Object::TexturePointer>{AssetFactory::getTextures()->logoDiffuse});
     plane->setGroupId(2);
     _pipeline->attach(plane.get());
     _objects.push_back(plane);
+    plane->setShaderCallback([this](lithium::Renderable* r, lithium::ShaderProgram* shaderProgram){
+        shaderProgram->setTime(time());
+        glm::vec3 right = glm::normalize(glm::vec3(
+            cos(_rotation * glm::pi<float>() * 0.5f),
+            0,
+            sin(_rotation * glm::pi<float>() * 0.5f)));
+        shaderProgram->setUniform("u_up", glm::vec3{0.0f, 1.0f, 0.0f});
+        shaderProgram->setUniform("u_right", right);
+    });
     plane->stage();
 
     _keyCache = std::make_shared<lithium::Input::KeyCache>(

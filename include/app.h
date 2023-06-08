@@ -20,4 +20,5 @@ private:
     std::vector<std::shared_ptr<lithium::Object>> _objects;
     float _cameraAngle{glm::pi<float>() * 0.25f};
     std::shared_ptr<lithium::Input::KeyCache> _keyCache;
+    int _rotation{0};
 };

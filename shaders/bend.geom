@@ -20,6 +20,7 @@ out vec3 normal;
 out vec3 fragPos;
 
 uniform mat4 u_projection;
+uniform float u_time;
 
 void createVertex(vec3 offset, vec2 uv)
 {
@@ -52,14 +53,16 @@ void main()
         gl_Position = u_projection * (gl_in[0].gl_Position + offset); 
         EmitVertex();
     }*/
-    createVertex(vec3(-1.0, -1.0, 0.0), vec2(0.0, 0.0));
-    createVertex(vec3(-1.0, 1.0, 0.0), vec2(0.0, 1.0));
-    createVertex(vec3(0.0, -1.0, 0.0), vec2(0.5, 0.0));
-    createVertex(vec3(0.0, 1.0, 0.0), vec2(0.5, 1.0));
+    float a = sin(u_time);
+    float ah = a * 0.5;
+    createVertex(vec3(-1.0 + a, -1.0, 0.0), vec2(0.0, 0.0));
+    createVertex(vec3(-1.0 + a, 1.0, 0.0), vec2(0.0, 1.0));
+    createVertex(vec3(0.0, -1.0, 0.0), vec2(0.5 - ah, 0.0));
+    createVertex(vec3(0.0, 1.0, 0.0), vec2(0.5 - ah, 1.0));
 
-    createVertex(vec3(0.0, -1.0, 0.0), vec2(0.5, 0.0));
-    createVertex(vec3(0.0, 1.0, 0.0), vec2(0.5, 1.0));
-    createVertex(vec3(0.0, -1.0, -1.0), vec2(1.0, 0.0));
-    createVertex(vec3(0.0, 1.0, -1.0), vec2(1.0, 1.0));
+    createVertex(vec3(0.0, -1.0, 0.0), vec2(0.5 - ah, 0.0));
+    createVertex(vec3(0.0, 1.0, 0.0), vec2(0.5 - ah, 1.0));
+    createVertex(vec3(0.0, -1.0, -1.0 - a), vec2(1.0, 0.0));
+    createVertex(vec3(0.0, 1.0, -1.0 - a), vec2(1.0, 1.0));
     EndPrimitive();
 }

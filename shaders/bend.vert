@@ -14,15 +14,15 @@ out VS_OUT {
 
 uniform mat4 u_view;
 uniform mat4 u_model;
+uniform vec3 u_up;
+uniform vec3 u_right;
 
 void main()
 {
     mat3 viewRotation = mat3(u_view);
-    vec3 r = vec3(1.0, 0.0, 0.0);
-    vec3 u = vec3(0.0, 1.0, 0.0);
-    vs_out.right = viewRotation * r;
-    vs_out.up = viewRotation * u;
-    vs_out.rxu = viewRotation * cross(r, u);
+    vs_out.right = viewRotation * u_right;
+    vs_out.up = viewRotation * u_up;
+    vs_out.rxu = viewRotation * cross(u_right, u_up);
 
     vs_out.fragPos = vec3(u_model * vec4(aPos, 1.0));
     mat3 normalMatrix = mat3(transpose(inverse(u_view * u_model)));
