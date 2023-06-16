@@ -40,25 +40,45 @@ App::App() : Application{"lithium-lab", glm::ivec2{1440, 800}, lithium::Applicat
     canvasFrame->setMesh(std::shared_ptr<lithium::Mesh>(lithium::Plane2D(glm::vec2{0.5f}, glm::vec2{64.0f})));
     canvasFrame->setTextures(std::vector<lithium::Object::TexturePointer>{AssetFactory::getTextures()->checkboard});
     auto classFrame = _canvas->frameById("canvas.0");
-    classFrame->setColor(glm::vec3{0.4f, 0.4f, 0.4f});
+    classFrame->setColor(glm::vec3{0.3f, 0.3f, 0.3f});
     auto titleFrame = _canvas->frameById("canvas.0.0");
     titleFrame->setColor(glm::vec3{0.2f, 0.2f, 0.2f});
     auto myText = titleFrame->createTextRenderer()->createText(AssetFactory::getFonts()->righteousFont, "Frame", 1.0f);
     myText->setPosition(glm::vec3{-myText->width() * 0.5f, -myText->height() * 0.5f, 0.0f});
     myText->setScale(1.0f);
-    _canvas->frameById("canvas.0.1")->setColor(glm::vec3{0.1f, 0.1f, 0.1f});
+    auto bodyFrame = _canvas->frameById("canvas.0.1");
+    bodyFrame->setColor(glm::vec3{0.1f, 0.1f, 0.1f});
     _canvas->frameById("canvas.1")->setColor(glm::vec3{0.0f, 0.0f, 1.0f});
 
+    static lithium::FrameLayout staticLayout{
+        "",
+        lithium::FrameLayout::Mode::Absolute,
+        lithium::FrameLayout::Orientation::Vertical,
+        lithium::FrameLayout::Alignment::Center,
+        glm::vec4{0.0f},
+        glm::vec4{0.0f},
+        glm::vec2{128.0f},
+        glm::vec2{-256.0f}
+    };
+
     lithium::FrameLayout* layout = classFrame->layout()->clone()->setPosition(glm::vec2{0.0f, -64.0f});
-    _canvas->refreshUI();
+    _canvas->refreshUI(); // TODO: Fix this refreshlayout stuff. Its bloating the code.
     auto classFrame2 = _canvas->addFrame(layout);
-    classFrame2->setColor(glm::vec3{0.4f, 0.4f, 0.4f});
+    lithium::FrameLayout* layout2 = canvasFrame->layout()->appendChild(staticLayout);
+    _canvas->refreshUI(); // TODO: Fix this refreshlayout stuff. Its bloating the code.
+    _canvas->addFrame(layout2);
+
+    classFrame2->setColor(classFrame->color());
     classFrame2->invalidate();
-    _canvas->frameById("canvas.2.1")->setColor(glm::vec3{0.1f, 0.1f, 0.1f});
+    _canvas->frameById("canvas.2.1")->setColor(bodyFrame->color());
     auto titleFrame2 = _canvas->frameById("canvas.2.0");
     titleFrame2->setColor(titleFrame->color());
     auto myText2 = titleFrame2->createTextRenderer()->createText(AssetFactory::getFonts()->righteousFont, "FrameRenderer", 1.0f);
     myText2->setPosition(glm::vec3{-myText2->width() * 0.5f, -myText2->height() * 0.5f, 0.0f});
+
+
+
+
 
 
     /*auto canvasFrame = std::make_shared<lithium::Frame>(nullptr, canvasDim);
