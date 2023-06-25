@@ -14,7 +14,7 @@ public:
 
     virtual void update(float dt) override;
 
-    virtual void onFramebufferResized(int width, int height);
+    virtual void onWindowSizeChanged(int width, int height) override;
 
 private:
     std::shared_ptr<Pipeline> _pipeline{nullptr};

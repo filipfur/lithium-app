@@ -174,7 +174,7 @@ void App::update(float dt)
     _canvas->render();
 }
 
-void App::onFramebufferResized(int width, int height)
+void App::onWindowSizeChanged(int width, int height)
 {
-    glViewport(0, 0, width, height);
+    _pipeline->setResolution(glm::ivec2{width, height});
 }

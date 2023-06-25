@@ -30,7 +30,7 @@ Pipeline::Pipeline(const glm::ivec2& resolution) : lithium::RenderPipeline{resol
     _mainGroup = createRenderGroup([this](lithium::Renderable* renderable) -> bool {
         return dynamic_cast<lithium::Object*>(renderable);
     });
-    _mainStage = addRenderStage(std::make_shared<lithium::RenderStage>(_frameBuffer, glm::ivec4{0, 0, resolution.x, resolution.y}, [this](){
+    _mainStage = addRenderStage(std::make_shared<lithium::RenderStage>(_frameBuffer, [this](){
         clearColor(0.8f, 1.0f, 0.8f, 1.0f);
         clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -45,7 +45,7 @@ Pipeline::Pipeline(const glm::ivec2& resolution) : lithium::RenderPipeline{resol
         _mainGroup->render(_blockShader.get());
     }));
 
-    _finalStage = addRenderStage(std::make_shared<lithium::RenderStage>(nullptr, glm::ivec4{0, 0, resolution.x, resolution.y}, [this](){
+    _finalStage = addRenderStage(std::make_shared<lithium::RenderStage>(nullptr, [this](){
         clearColor(0.0f, 0.0f, 0.0f, 0.0f);
         clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         _msaaShader->use();
