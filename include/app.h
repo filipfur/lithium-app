@@ -1,5 +1,6 @@
 #pragma once
 
+#include <iostream>
 #include "glapplication.h"
 #include "pipeline.h"
 #include "glmesh.h"
@@ -15,6 +16,11 @@ public:
     virtual void update(float dt) override;
 
     virtual void onWindowSizeChanged(int width, int height) override;
+
+    virtual void onFpsCount(int fps) override
+    {
+        std::cout << "FPS: " << fps << std::endl;
+    }
 
 private:
     std::shared_ptr<Pipeline> _pipeline{nullptr};

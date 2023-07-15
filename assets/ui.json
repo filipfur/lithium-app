@@ -9,8 +9,8 @@
         {
             "mode": "absolute",
             "margin": [0.0],
-            "padding": [1.0],
-            "dimension": [0.0, 0.0],
+            "padding": [4.0],
+            "dimension": [256.0, 256.0],
             "position": [256.0, 256.0],
             "children": [
                 {
@@ -20,19 +20,33 @@
                     "dimension": [256.0, 80.0]
                 },
                 {
-                    "mode": "fixed",
+                    "mode": "fill",
                     "margin": [0.0, 0.0, 0.0, 0.0],
-                    "padding": [8.0],
-                    "dimension": [256.0, 176.0]
+                    "padding": [8.0]
                 }
             ]
         },
         {
             "mode": "absolute",
             "margin": [0.0],
-            "padding": [8.0],
-            "dimension": [256.0, 256.0],
-            "position": [-256.0, 512.0]
+            "padding": [4.0],
+            "dimension": [0.0, 0.0],
+            "position": [-256.0, 512.0],
+            "children": [
+                {
+                    "mode": "fixed",
+                    "margin": [16.0, 128.0, 0.0, 0.0],
+                    "padding": [8.0],
+                    "dimension": [64.0, 80.0],
+                    "alignment": "left"
+                },
+                {
+                    "mode": "fixed",
+                    "margin": [8.0, 128.0, 0.0, 0.0],
+                    "padding": [8.0],
+                    "dimension": [340.0, 176.0]
+                }
+            ]
         }
     ]
 }
