@@ -14,6 +14,7 @@ public:
     {
         std::shared_ptr<lithium::Mesh> cube;
         std::shared_ptr<lithium::Mesh> screen;
+        std::shared_ptr<lithium::Mesh> monkey;
     } _meshes;
 
     struct Textures

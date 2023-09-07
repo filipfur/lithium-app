@@ -28,6 +28,7 @@ void AssetFactory::loadMeshes()
     AssetFactory& instance = getInstance();
     instance._meshes.screen.reset(lithium::Plane2D());
     instance._meshes.cube = lithium::tinyobjloader_load("assets/block.obj", objectAttributes);
+    instance._meshes.monkey = lithium::tinyobjloader_load("assets/monkey.obj", objectAttributes);
 }
 
 void AssetFactory::loadTextures()
