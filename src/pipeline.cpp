@@ -1,6 +1,6 @@
 #include "pipeline.h"
-#include "shape.h"
 #include "glentity.h"
+#include "glplane.h"
 
 Pipeline::Pipeline(const glm::ivec2& resolution) : lithium::RenderPipeline{resolution},
     _camera{new lithium::SimpleCamera(glm::perspective(glm::radians(45.0f), (float)resolution.x / (float)resolution.y, 0.1f, 100.0f))},
@@ -26,13 +26,13 @@ Pipeline::Pipeline(const glm::ivec2& resolution) : lithium::RenderPipeline{resol
     _frameBuffer->declareBuffers();
     _frameBuffer->unbind();
 
-    _screenMesh = std::shared_ptr<lithium::Mesh>(shape::Plane());
+    _screenMesh = std::shared_ptr<lithium::Mesh>(lithium::Plane2D());
 
     _mainGroup = createRenderGroup([this](lithium::Renderable* renderable) -> bool {
         return !renderable->hasAttachments();
     });
 
-    _mainStage = addRenderStage(std::make_shared<lithium::RenderStage>(_frameBuffer, glm::ivec4{0, 0, resolution.x, resolution.y}, [this](){
+    _mainStage = addRenderStage(std::make_shared<lithium::RenderStage>(_frameBuffer, [this](){
         clearColor(0.8f, 1.0f, 0.8f, 1.0f);
         clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -47,7 +47,7 @@ Pipeline::Pipeline(const glm::ivec2& resolution) : lithium::RenderPipeline{resol
         _mainGroup->render(_blockShader.get());
     }));
 
-    _finalStage = addRenderStage(std::make_shared<lithium::RenderStage>(nullptr, glm::ivec4{0, 0, resolution.x, resolution.y}, [this](){
+    _finalStage = addRenderStage(std::make_shared<lithium::RenderStage>(nullptr, [this](){
         clearColor(0.0f, 0.0f, 0.0f, 0.0f);
         clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         _msaaShader->use();
@@ -60,7 +60,7 @@ Pipeline::Pipeline(const glm::ivec2& resolution) : lithium::RenderPipeline{resol
     setViewportToResolution();
 }
 
-Pipeline::~Pipeline()
+Pipeline::~Pipeline() noexcept
 {
     _blockShader = nullptr;
     _screenShader = nullptr;

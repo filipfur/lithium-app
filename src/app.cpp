@@ -1,7 +1,6 @@
 #include "app.h"
 
 #include "assetfactory.h"
-#include "shape.h"
 #include "utility.h"
 #include "glgeometry.h"
 #include "glaabb.h"
@@ -147,7 +146,7 @@ void App::update(float dt)
     _pipeline->render();
 }
 
-void App::onFramebufferResized(int width, int height)
+void App::onWindowSizeChanged(int width, int height)
 {
-    glViewport(0, 0, width, height);
+    _pipeline->setResolution(glm::ivec2{width, height});
 }

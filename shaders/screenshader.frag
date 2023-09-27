@@ -3,8 +3,6 @@
 out vec4 fragColor;
 
 in vec2 texCoord;
-in vec3 normal;
-in vec3 color;
 uniform sampler2D u_texture;
 
 void main()
