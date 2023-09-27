@@ -69,14 +69,14 @@ App::App() : Application{"lithium-lab", glm::ivec2{1440, 800}, lithium::Applicat
     _canvas->addFrame(layout2);
 
     classFrame2->setColor(classFrame->color());
-    classFrame2->invalidate();
+    classFrame2->refresh();
     _canvas->frameById("canvas.2.1")->setColor(bodyFrame->color());
     auto titleFrame2 = _canvas->frameById("canvas.2.0");
     titleFrame2->setColor(titleFrame->color());
     auto myText2 = titleFrame2->createTextRenderer()->createText(AssetFactory::getFonts()->righteousFont, "FrameRenderer", 1.0f);
     myText2->setPosition(glm::vec3{-myText2->width() * 0.5f, -myText2->height() * 0.5f, 0.0f});
 
-    input()->setDragCallback([this](int button, int modifiers, const glm::vec2& start, const glm::vec2& current, const glm::vec2& delta, bool completed) {
+    input()->setDragCallback([this](int button, int modifiers, const glm::vec2& start, const glm::vec2& current, const glm::vec2& delta, lithium::Input::DragState dragState) {
         if(button == GLFW_MOUSE_BUTTON_LEFT)
         {
             _canvas->move(glm::vec2(-delta.x, delta.y));
