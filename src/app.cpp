@@ -31,7 +31,7 @@ App::App() : Application{"lithium-lab", glm::ivec2{1440, 800}, lithium::Applicat
 
     // Key cache for rotating the camera left and right.
     _keyCache = std::make_shared<lithium::Input::KeyCache>(
-        std::initializer_list<int>{GLFW_KEY_LEFT, GLFW_KEY_RIGHT});
+        std::initializer_list<int>{GLFW_KEY_LEFT, GLFW_KEY_RIGHT, GLFW_KEY_UP, GLFW_KEY_DOWN});
     input()->setKeyCache(_keyCache);
 
     // Escape key to close the application.
@@ -41,8 +41,9 @@ App::App() : Application{"lithium-lab", glm::ivec2{1440, 800}, lithium::Applicat
     });
 
     // Set the camera oirigin position and target.
-    _pipeline->camera()->setPosition(glm::vec3{3.0f, 3.0f, 3.0f});
-    _pipeline->camera()->setTarget(glm::vec3{0.0f});
+    _pipeline->camera()->setTarget(_cameraTarget);
+
+    setMaxFps(120.0f);
 
     printf("%s\n", glGetString(GL_VERSION));
 }
@@ -61,23 +62,38 @@ void App::update(float dt)
     for(auto o : _objects)
     {
         o->update(dt);
-        o->setRotation(o->rotation() + glm::vec3{8.0f * dt});
+        /*o->setQuaternion(o->quaternion() * glm::angleAxis(0.5f * dt, glm::vec3(1,0,0))
+            * glm::angleAxis(0.5f * dt, glm::vec3(0,1,0))
+            * glm::angleAxis(0.5f * dt, glm::vec3(0,0,1)));*/
     }
 
     // Rotate the camera around the origin on player input.
     if(_keyCache->isPressed(GLFW_KEY_LEFT))
     {
-        _cameraAngle -= glm::pi<float>() * 0.5f * dt;
+        _cameraYaw += glm::pi<float>() * 0.5f * dt;
     }
     else if(_keyCache->isPressed(GLFW_KEY_RIGHT))
     {
-        _cameraAngle += glm::pi<float>() * 0.5f * dt;
+        _cameraYaw -= glm::pi<float>() * 0.5f * dt;
     }
-    static const float cameraRadius = 6.0f;
-    float camX = cos(_cameraAngle) * cameraRadius;
-    static const float camY = cameraRadius * 0.5f;
-    float camZ = sin(_cameraAngle) * cameraRadius;
-    _pipeline->camera()->setPosition(glm::vec3{camX, camY, camZ});
+
+    if(_keyCache->isPressed(GLFW_KEY_UP))
+    {
+        _cameraPitch += glm::pi<float>() * 0.5f * dt;
+    }
+    else if(_keyCache->isPressed(GLFW_KEY_DOWN))
+    {
+        _cameraPitch -= glm::pi<float>() * 0.5f * dt;
+    }
+
+    static const float cameraRadius = 8.0f;
+
+    glm::vec3 cameraPosition;
+    cameraPosition.x = _cameraTarget.x + cameraRadius * cos(_cameraYaw) * cos(_cameraPitch);
+    cameraPosition.y = _cameraTarget.y + cameraRadius * sin(_cameraPitch);
+    cameraPosition.z = _cameraTarget.z + cameraRadius * sin(_cameraYaw) * cos(_cameraPitch);
+
+    _pipeline->camera()->setPosition(cameraPosition);
     _pipeline->render();
 }
 

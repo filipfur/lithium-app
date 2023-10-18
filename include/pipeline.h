@@ -4,6 +4,7 @@
 #include "glsimplecamera.h"
 #include "glrenderpipeline.h"
 #include "glframebuffer.h"
+#include "gluniformbufferobject.h"
 
 class Pipeline : public lithium::RenderPipeline
 {
@@ -31,6 +32,8 @@ private:
     std::shared_ptr<lithium::ShaderProgram> _msaaShader{nullptr};
     std::shared_ptr<lithium::ShaderProgram> _screenShader{nullptr};
     std::shared_ptr<lithium::SimpleCamera> _camera{nullptr};
+
+    lithium::UniformBufferObject _cameraUBO;
 
     /*Render groups*/
     std::shared_ptr<lithium::RenderGroup> _screenGroup;

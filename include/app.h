@@ -18,13 +18,15 @@ public:
 protected:
     virtual void onFpsCount(int fps) override
     {
-        printf("FPS: %d\n", fps);
+        //printf("FPS: %d\n", fps);
     }
 
 private:
     std::shared_ptr<Pipeline> _pipeline{nullptr};
     std::vector<std::shared_ptr<lithium::Object>> _objects;
     std::shared_ptr<lithium::Object> _background;
-    float _cameraAngle{0.0f};
+    float _cameraYaw{0.0f};
+    float _cameraPitch{0.0f};
+    glm::vec3 _cameraTarget{0.0f};
     std::shared_ptr<lithium::Input::KeyCache> _keyCache;
 };
